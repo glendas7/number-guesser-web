@@ -2,7 +2,7 @@ import * as Auth from '../controller/auth.js'
 import * as Elements from './elements.js'
 import * as Constants from '../model/constants.js'
 import {
-  updateDocForLED, attachRealtimeListener, initFirestoreDocs,
+  updateDocForLED, attachRealtimeListener, initFirestoreDocs, updateGuess,
 } from '../controller/firestore_controller.js';
 
 const noMonitor = 'No Monitor';
@@ -43,6 +43,10 @@ export function home_page() {
     <div class="d-flex justify-content-start">
       <h5>Start/Stop Monitor Button Status:</h5>
       <button id="button-monitor-button-status" type="input" class="btn btn-outline-primary ms-3">Start</button>
+      <input type="number" id="guess" class="form-control" placeholder="guess goes here">
+      <button id="button-enter-guess" type="input" class="btn">SUBMIT</button>
+      <button id="button-reset-guess" type="input" class="btn">RESET</button>
+
     </div>
 	<br>
     <div class="d-flex justify-content-start">
@@ -57,13 +61,29 @@ export function home_page() {
 
   <div style="background-color:rgb(240,248,255); margin-top: 50px;">
     <div class="d-flex justify-content-start">
-      <h5>Control LED1</h5>
+      <h5>Control LEDGREEN</h5>
       <button id="button-led-control" type="input" class="btn btn-outline-primary ms-3">Turn ON</button>
     </div>
   </div>
   `;
 
   Elements.root.innerHTML = html;
+  let myGuess
+
+  const enterGuessButton = document.getElementById('button-enter-guess');
+    enterGuessButton.addEventListener('click', e => {
+      myGuess = document.getElementById("guess").value
+      if(myGuess <= 0 || myGuess > 10){
+        alert("Please select a number between 1 & 10");
+        document.getElementById("guess").value = 0;
+      }
+      else{
+        myGuess = document.getElementById("guess").value
+        console.log(myGuess);
+        updateGuess({ guess: myGuess });
+      }
+    });
+
 
   const statusMonitorButton = document.getElementById('button-monitor-button-status');
   statusMonitorButton.addEventListener('click', e => {
@@ -88,10 +108,10 @@ export function home_page() {
     const label = e.target.innerHTML;
     if (label == 'Turn ON') {
       e.target.innerHTML = 'Turn OFF';
-      updateDocForLED({ led1: true });
+      updateDocForLED({ ledGreen: true });
     } else {
       e.target.innerHTML = 'Turn ON';
-      updateDocForLED({ led1: false });
+      updateDocForLED({ ledGreen: false });
     }
   });
 

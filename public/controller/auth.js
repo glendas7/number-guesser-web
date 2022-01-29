@@ -1,6 +1,6 @@
 import {
 	getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"
+} from "https://www.gstatic.com/firebasejs/9.6.3/firebase-auth.js"
 
 import * as Route from './routes.js'
 import * as Elements from '../viewpage/elements.js'
