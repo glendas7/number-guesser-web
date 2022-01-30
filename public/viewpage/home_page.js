@@ -109,11 +109,11 @@ function buttonListener(doc) {
 }
 
 function gameDataListener(doc) {
-  const buttonDoc = doc.data();
-  if (buttonDoc['guess']) {
-    myGuess = buttonDoc['guess']
+  const gameDataDoc = doc.data();
+  if (gameDataDoc['guess']) {
+    myGuess = gameDataDoc['guess']
   }
-  if (buttonDoc['submitButton']) {
-    randomNum = buttonDoc['submitButton']
+  if (gameDataDoc['answer']) {
+    randomNum = gameDataDoc['answer']
   }
 }
