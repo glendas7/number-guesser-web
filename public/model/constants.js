@@ -9,9 +9,9 @@ export const docGameData = {
 }
 
 export const docButtons = {
-  button1: false,
-  button2: false,
-  enterButton: false,
+  
+  startButton: false,
+  submitButton: false,
   incrementGuessButton: false,
 }
 
@@ -20,5 +20,5 @@ export const docLEDs = {
   ledRed: false,
   ledYellow: false,
   ledWhite: false,
-  led2: false,
+  ledBlue: false,
 }

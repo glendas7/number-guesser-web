@@ -12,15 +12,17 @@ export async function initFirestoreDocs() {
 	await setDoc(doc(db, Constants.COLLECTION, Constants.DOCNAME_GAMEDATA), Constants.docGameData);
 }
 
-export async function updateGuess(guess){
+export async function updateButtons(update){
+	const docRef = doc(db, Constants.COLLECTION, Constants.DOCNAME_BUTTONS);
+	await updateDoc(docRef, update);
+}
+
+
+export async function updateGameData(guess){
 	const docRef = doc(db, Constants.COLLECTION, Constants.DOCNAME_GAMEDATA);
 	await updateDoc(docRef, guess);
 }
 
-export async function updateAnswer(answ){
-	const docRef = doc(db, Constants.COLLECTION, Constants.DOCNAME_LEDS);
-	await updateDoc(docRef, answ);
-}
 
 export async function updateDocForLED(update) {
 	const docRef = doc(db, Constants.COLLECTION, Constants.DOCNAME_LEDS);

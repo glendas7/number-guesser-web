@@ -2,32 +2,16 @@ import * as Auth from '../controller/auth.js'
 import * as Elements from './elements.js'
 import * as Constants from '../model/constants.js'
 import {
-  updateDocForLED, attachRealtimeListener, initFirestoreDocs, updateGuess,
+  updateDocForLED, attachRealtimeListener, initFirestoreDocs, updateGameData, updateButtons,
 } from '../controller/firestore_controller.js';
 
-const noMonitor = 'No Monitor';
+export let buttonsDoc = null;
+export let gameDataDoc = null;
 
-export let unsubButtonsDoc = null;
-
-export function addEventListeners() {
-
-  window.addEventListener('unload', e => {
-    if (unsubButtonsDoc) {
-      unsubButtonsDoc();
-    }
-  });
-
-  Elements.buttonInitConfig.addEventListener('click', async e => {
-    try {
-      await initFirestoreDocs();
-      alert('Firestore collection initialized!')
-    } catch (e) {
-      console.log(`Init Config error:\n${e}`);
-      alert(`Init Config error:\n${e}`);
-    }
-  });
-
-}
+let inputNumberGuess
+let startGuessButton
+let myGuess
+let randomNum
 
 export function home_page() {
   if (!Auth.currentUser) {
@@ -39,96 +23,92 @@ export function home_page() {
 
   let html = '<h3 class="d-flex justify-content-center m-3">Control Panel<h3>';
   html += `
-  <div style="background-color:rgb(245,245,220);">
-    <div class="d-flex justify-content-start">
-      <h5>Start/Stop Monitor Button Status:</h5>
-      <button id="button-monitor-button-status" type="input" class="btn btn-outline-primary ms-3">Start</button>
-      <input type="number" id="guess" class="form-control" placeholder="guess goes here">
-      <button id="button-enter-guess" type="input" class="btn">SUBMIT</button>
-      <button id="button-reset-guess" type="input" class="btn">RESET</button>
-
-    </div>
-	<br>
-    <div class="d-flex justify-content-start">
-      <h5>Button1:</h5>
-      <button disabled id="status-button1" type="input" class="btn btn-primary mx-3">
-      ${noMonitor}</button>
-      <h5>Button2:</h5>
-      <button disabled id="status-button2" type="input" class="btn btn-primary mx-3">
-      ${noMonitor}</button>
+  <div class="container">
+    <div class="instruction-div">
+      <B>Number Guesser</B><BR>
+      How to play:<BR>
+      1)Press Start<BR>
+      2)Enter a number from 1-10<BR>
+      3)Click submit to see if you guess right!
     </div>
   </div>
-
-  <div style="background-color:rgb(240,248,255); margin-top: 50px;">
-    <div class="d-flex justify-content-start">
-      <h5>Control LEDGREEN</h5>
-      <button id="button-led-control" type="input" class="btn btn-outline-primary ms-3">Turn ON</button>
+  <div class="container">
+    <div class="input-div">
+      <input id="input-number-guess" type="number" class="form-control" placeholder="your guess goes here" readonly>
+      <button id="button-start-guess" type="input" class="btn">START</button>
+      <button id="button-submit-guess" type="input" class="btn ">SUBMIT</button>
+      <div><p id="answer-content">Your answer will display here!</p></div>
     </div>
   </div>
   `;
 
   Elements.root.innerHTML = html;
-  let myGuess
 
-  const enterGuessButton = document.getElementById('button-enter-guess');
-    enterGuessButton.addEventListener('click', e => {
-      myGuess = document.getElementById("guess").value
+  updateDocForLED({ ledBlue: false })
+  updateDocForLED({ ledWhite: false })
+  updateButtons({submitButton: false})
+  updateButtons({startButton: false})
+  updateGameData({guess: 0})
+  updateGameData({answer: 0})
+
+  buttonsDoc = attachRealtimeListener(Constants.COLLECTION,
+    Constants.DOCNAME_BUTTONS, buttonListener);
+  gameDataDoc = attachRealtimeListener(Constants.COLLECTION,
+    Constants.DOCNAME_GAMEDATA, gameDataListener);
+  inputNumberGuess = document.getElementById('input-number-guess');
+  startGuessButton = document.getElementById('button-start-guess');
+
+
+  startGuessButton.addEventListener('click', e => {
+    inputNumberGuess.removeAttribute('readonly')
+    randomNum = Math.floor(Math.random() * 10) + 1;
+    updateGameData({answer: randomNum })
+    document.getElementById("input-number-guess").value = parseInt("0");
+    updateGameData({guess: 0})
+    updateButtons({submitButton: false})
+    updateButtons({startButton: true})
+  }) 
+
+  const submitGuessButton = document.getElementById('button-submit-guess');
+    submitGuessButton.addEventListener('click', e => {
+      myGuess = inputNumberGuess.value
       if(myGuess <= 0 || myGuess > 10){
-        alert("Please select a number between 1 & 10");
-        document.getElementById("guess").value = 0;
+        alert("Please select a number between 1 & 10")
+        inputNumberGuess.value = parseInt("0");
       }
       else{
-        myGuess = document.getElementById("guess").value
+        inputNumberGuess.setAttribute("readonly", "")
         console.log(myGuess);
-        updateGuess({ guess: myGuess });
+        console.log(randomNum);
+        updateGameData({guess: parseInt(myGuess) })
+        updateButtons({startButton: false})
+        updateButtons({submitButton: true})
       }
     });
-
-
-  const statusMonitorButton = document.getElementById('button-monitor-button-status');
-  statusMonitorButton.addEventListener('click', e => {
-    const label = e.target.innerHTML;
-    if (label == 'Start') {
-      e.target.innerHTML = 'Stop';
-      // listen to Firestore doc changes
-      unsubButtonsDoc = attachRealtimeListener(Constants.COLLECTION,
-        Constants.DOCNAME_BUTTONS, buttonListener);
-    } else {
-      e.target.innerHTML = 'Start';
-      const status1 = document.getElementById('status-button1');
-      const status2 = document.getElementById('status-button2');
-      status1.innerHTML = noMonitor;
-      status2.innerHTML = noMonitor;
-      if (unsubButtonsDoc) unsubButtonsDoc();
-    }
-  });
-
-  const ledButton = document.getElementById('button-led-control');
-  ledButton.addEventListener('click', e => {
-    const label = e.target.innerHTML;
-    if (label == 'Turn ON') {
-      e.target.innerHTML = 'Turn OFF';
-      updateDocForLED({ ledGreen: true });
-    } else {
-      e.target.innerHTML = 'Turn ON';
-      updateDocForLED({ ledGreen: false });
-    }
-  });
 
 }
 
 function buttonListener(doc) {
-  const status1 = document.getElementById('status-button1');
-  const status2 = document.getElementById('status-button2');
   const buttonDoc = doc.data();
-  if (buttonDoc['button1']) {
-    status1.innerHTML = 'ON';
-  } else {
-    status1.innerHTML = 'OFF';
+  const answerMessage = document.getElementById('answer-content')
+  if (buttonDoc['startButton']) {
+    inputNumberGuess.value = parseInt("0");
+    inputNumberGuess.removeAttribute('readonly')
+    answerMessage.innerHTML = "Your answer will display here!"
   }
-  if (buttonDoc['button2']) {
-    status2.innerHTML = 'ON';
-  } else {
-    status2.innerHTML = 'OFF';
+  if (buttonDoc['submitButton']) {
+    inputNumberGuess.setAttribute("readonly", "")
+    if(myGuess == randomNum) answerMessage.innerHTML = "CORRECT!"
+    else answerMessage.innerHTML = "INCORRECT!"
+  }
+}
+
+function gameDataListener(doc) {
+  const buttonDoc = doc.data();
+  if (buttonDoc['guess']) {
+    myGuess = buttonDoc['guess']
+  }
+  if (buttonDoc['submitButton']) {
+    randomNum = buttonDoc['submitButton']
   }
 }

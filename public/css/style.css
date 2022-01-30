@@ -1,0 +1,51 @@
+body{
+    background-color: rgb(79, 79, 79);
+}
+
+.btn {
+    background-color: rgb(57, 57, 57);
+    color: rgb(148, 148, 148);
+    font-size: 20px;
+    border-color: transparent;
+}
+
+
+.btn:hover {
+    background-color: rgb(128, 128, 128);
+    color: rgb(16, 0, 105);
+    border-color: transparent;
+}
+
+.container {
+    width: 400px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+.input-div {
+    padding-top: 10%;
+    align-items: center;
+    width: 300px;
+    height: 300px;
+    text-align: center;
+    background-color: rgb(55, 55, 110);
+    position:relative;
+}
+
+.header{
+    justify-content: center;
+    background-color: rgb(55, 55, 110);
+    text-align: center;
+    font-size: large;
+}
+
+.instruction-div{
+    text-align: center;
+    background-color: rgb(106, 106, 106);
+}
+
+input{
+    max-width:99%;
+}
