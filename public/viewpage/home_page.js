@@ -97,9 +97,14 @@ function buttonListener(doc) {
     answerMessage.innerHTML = "Your answer will display here!"
   }
   if (buttonDoc['submitButton']) {
+    let html
     inputNumberGuess.setAttribute("readonly", "")
-    if(myGuess == randomNum) answerMessage.innerHTML = "CORRECT!"
-    else answerMessage.innerHTML = "INCORRECT!"
+    if(myGuess == randomNum) html = "CORRECT!"
+    else html = "INCORRECT!"
+
+    html += `<BR>Your guess was ${myGuess} and the answer was ${randomNum}!<BR>`
+    answerMessage.innerHTML = html
+
   }
 }
 
